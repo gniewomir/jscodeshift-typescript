@@ -1,4 +1,4 @@
-import {API, FileInfo} from 'jscodeshift';
+import {API, FileInfo, ImportDefaultSpecifier, ImportNamespaceSpecifier, ImportSpecifier} from 'jscodeshift';
 import type {TestOptions} from 'jscodeshift/src/testUtils';
 
 function assert(condition: boolean, message: string = ''): asserts condition is true {
@@ -55,11 +55,17 @@ export default function transformer(file: FileInfo, api: API) {
   if (knownImportDeclarations.length === 1) {
     const knownDeclaration = knownImportDeclarations.nodes()[0];
     const knownDeclarationSpecifiers = knownDeclaration.specifiers || [];
+    const uniqueSpecifiersMap = new Map<string, (ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier)>();
+    for (const specifier of [...knownDeclarationSpecifiers, j.importSpecifier(j.identifier(FUNCTION_IDENTIFIER_NAME))]  ) {
+      const name = (specifier as ImportSpecifier).imported.name.toString();
+      uniqueSpecifiersMap.set(name, specifier as ImportSpecifier);
+    }
+
     allImportDeclarations.filter(callPath => {
       return callPath.node.source.value === IMPORT_SOURCE_LITERAL;
     }).replaceWith(
       j.importDeclaration(
-        [...knownDeclarationSpecifiers, j.importSpecifier(j.identifier(FUNCTION_IDENTIFIER_NAME))],
+        uniqueSpecifiersMap.values().toArray(),
         j.literal(IMPORT_SOURCE_LITERAL)
       )
     );

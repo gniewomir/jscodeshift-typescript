@@ -42,6 +42,26 @@ describe('soc-console-error-to-log-error', () => {
     expect(transform({source})).toEqual(expected);
   });
 
+  it('do not duplicate import specifiers', async () => {
+    const source = outdent`
+      import { logError } from 'src/lib.logger';
+
+      const error = new Error('thrown');
+      console.error(error);
+      logError(error);
+    `;
+
+    const expected = outdent`
+      import { logError } from "src/lib.logger";
+
+      const error = new Error('thrown');
+      logError(error);
+      logError(error);
+    `;
+
+    expect(transform({source})).toEqual(expected);
+  });
+
   it('do not put imports above comments, if there was no imports before', async () => {
     const source = outdent`
       /* eslint-disable no-unused-vars */
@@ -79,7 +99,7 @@ describe('soc-console-error-to-log-error', () => {
     `;
 
     const expected = outdent`
-      import { logError, logError } from "src/lib.logger";
+      import { logError } from "src/lib.logger";
 
       const error = new Error('thrown');
       (
