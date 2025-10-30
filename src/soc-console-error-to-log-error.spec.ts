@@ -22,20 +22,71 @@ describe('soc-console-error-to-log-error', () => {
     expect(transform({source})).toEqual(expected);
   });
 
-  it('at the moment we do not deduplicate imports leaving it for the linter', async () => {
+  it('do not duplicate imports', async () => {
+    const source = outdent`
+      import { log } from 'src/lib.logger';
+
+      const error = new Error('thrown');
+      console.error(error);
+      log(error);
+    `;
+
+    const expected = outdent`
+      import { logError, log } from "src/lib.logger";
+
+      const error = new Error('thrown');
+      logError(error);
+      log(error);
+    `;
+
+    expect(transform({source})).toEqual(expected);
+  });
+
+  it('do not put imports above comments, if there was no imports before', async () => {
+    const source = outdent`
+      /* eslint-disable no-unused-vars */
+      // comment 1
+      const error = new Error('thrown');
+      // comment 2
+      console.error(error);
+      // comment 3
+      statement;
+    `;
+
+    const expected = outdent`
+      /* eslint-disable no-unused-vars */
+      // comment 1
+      import { logError } from "src/lib.logger";
+
+      const error = new Error('thrown');
+
+      // comment 2
+      logError(error);
+
+      // comment 3
+      statement;
+    `;
+
+    expect(transform({source})).toEqual(expected);
+  })
+
+  it('do not replace arrow function expressions', async () => {
     const source = outdent`
       import { logError } from 'src/lib.logger';
 
       const error = new Error('thrown');
-      console.error(error);
+      (
+        (error) => console.error(error)
+      )(error);
     `;
 
     const expected = outdent`
-      import { logError } from "src/lib.logger";
       import { logError } from 'src/lib.logger';
 
       const error = new Error('thrown');
-      logError(error);
+      (
+        (error) => logError(error)
+      )(error);
     `;
 
     expect(transform({source})).toEqual(expected);
