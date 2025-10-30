@@ -1,16 +1,4 @@
-# jscodeshift-typescript-example
-
-- [TypeScript all the way 🚀](#typescript-all-the-way-)
-- [TypeScript transformer](#typescript-transformer)
-- [Vibe Code Your `jscodeshift` Codemod 🤖](#vibe-code-your-jscodeshift-codemod-)
-- [Installation](#installation)
-- [Run a codemod](#run-a-codemod)
-- [Test](#test)
-- [Test and Debug with Vitest](#test-and-debug-with-vitest)
-- [Behind the scenes](#behind-the-scenes)
-- [Resources \& Inspiration](#resources--inspiration)
-- [Awesome lists](#awesome-lists)
-
+# jscodeshift-typescript
 
 ## TypeScript all the way 🚀
 
@@ -20,33 +8,6 @@ Example usage of [jscodeshift](https://github.com/facebook/jscodeshift) _for_ Ty
 - TypeScript transformer
 - TypeScript test files
 - TypeScript fixtures
-
-## TypeScript transformer
-
-Strongly typed code and code completion with `@types/jscodeshift`
-
-![code-completion](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/code-completion.gif)
-
-## Vibe Code Your `jscodeshift` Codemod 🤖
-
-With [`.github/copilot-instructions.md`](.github/copilot-instructions.md) and [`.github/prompts/new-transformer.prompt.md`](.github/prompts/new-transformer.prompt.md) you can vibe code your jscodeshift codemod.
-
-Example prompt to create a new transform with tests:
-
-``````prompt
-Create a new transform to add a post-fix "funny" to class name
-
-before:
-```ts
-class Foo {}
-```
-
-after:
-```ts
-class FooFunny {}
-```
-
-``````
 
 ## Installation
 
@@ -68,12 +29,6 @@ npx jscodeshift -t ./src/simple-rename.ts --extensions=ts --parser=ts **/*.ts --
 npm test
 ```
 
-## Test and Debug with Vitest
-
-Install the [Vitest VSCode extension](https://marketplace.visualstudio.com/items?itemName=vitest.explorer) to test and debug your transformer.
-
-![jscodeshift-vitest](https://raw.githubusercontent.com/chimurai/jscodeshift-typescript-example/main/docs/jscodeshift-vitest.gif)
-
 ## Behind the scenes
 
 Use `@typescript-eslint/parser` in [https://astexplorer.net](https://astexplorer.net) when working with the jscodeshift's `parser="ts"`
@@ -82,6 +37,7 @@ By default jscodeshift will use the [`babel` parser](https://github.com/facebook
 
 ## Resources & Inspiration
 
+- Base https://github.com/chimurai/jscodeshift-typescript-example
 - <https://github.com/facebook/jscodeshift/tree/master/sample>
 - <https://github.com/facebook/jscodeshift/blob/master/recipes/retain-first-comment.md>
 - <https://github.com/elliottsj/jscodeshift-typescript-example>
