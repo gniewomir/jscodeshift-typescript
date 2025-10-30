@@ -59,10 +59,8 @@ describe('soc-console-error-to-log-error', () => {
       import { logError } from "src/lib.logger";
 
       const error = new Error('thrown');
-
       // comment 2
       logError(error);
-
       // comment 3
       statement;
     `;
@@ -81,7 +79,7 @@ describe('soc-console-error-to-log-error', () => {
     `;
 
     const expected = outdent`
-      import { logError } from 'src/lib.logger';
+      import { logError, logError } from "src/lib.logger";
 
       const error = new Error('thrown');
       (

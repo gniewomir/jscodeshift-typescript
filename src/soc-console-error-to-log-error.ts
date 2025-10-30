@@ -32,13 +32,10 @@ export default function transformer(file: FileInfo, api: API) {
       return binding === null;
     })
     // get parent expression, bc we replace expression for expression
-    .closest(j.ExpressionStatement)
     .forEach((callPath) => {
-      const replacement = j.expressionStatement(
-        j.callExpression(
-          j.identifier('logError'),
-          [ j.identifier(ERROR_VARIABLE_IDENTIFIER_NAME) ]
-        )
+      const replacement = j.callExpression(
+        j.identifier('logError'),
+        [ j.identifier(ERROR_VARIABLE_IDENTIFIER_NAME) ]
       );
       callPath.replace(replacement);
     });
