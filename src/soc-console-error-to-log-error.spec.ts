@@ -10,13 +10,13 @@ describe('soc-console-error-to-log-error', () => {
   it('replaces console.error( error ) calls with logError calls and imports logError', async () => {
     const source = outdent`
       const error = new Error('thrown');
-      console.error(error);
+      console.error('test', error, { service: 'test' });
     `;
 
     const expected = outdent`
       import { logError } from "src/lib.logger";
       const error = new Error('thrown');
-      logError(error);
+      logError('test', error, { service: 'test' });
     `;
 
     expect(transform({source})).toEqual(expected);

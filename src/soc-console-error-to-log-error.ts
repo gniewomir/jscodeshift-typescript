@@ -12,13 +12,9 @@ export default function transformer(file: FileInfo, api: API) {
   const root = j(file.source);
 
   const FUNCTION_IDENTIFIER_NAME = 'logError';
-  const ERROR_VARIABLE_IDENTIFIER_NAME = 'error';
   const IMPORT_SOURCE_LITERAL = 'src/lib.logger';
 
   const targetedConsoleCalls = root.find(j.CallExpression, {
-    arguments: [{
-      type: 'Identifier', name: ERROR_VARIABLE_IDENTIFIER_NAME
-    }],
     callee: {
       type: 'MemberExpression',
       object: {type: 'Identifier', name: 'console'},
@@ -34,7 +30,7 @@ export default function transformer(file: FileInfo, api: API) {
     .forEach((callPath) => {
       const replacement = j.callExpression(
         j.identifier('logError'),
-        [ j.identifier(ERROR_VARIABLE_IDENTIFIER_NAME) ]
+        callPath.node.arguments
       );
       callPath.replace(replacement);
     });
