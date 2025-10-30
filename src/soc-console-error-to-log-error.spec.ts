@@ -32,7 +32,7 @@ describe('soc-console-error-to-log-error', () => {
     `;
 
     const expected = outdent`
-      import { logError, log } from "src/lib.logger";
+      import { log, logError } from "src/lib.logger";
 
       const error = new Error('thrown');
       logError(error);

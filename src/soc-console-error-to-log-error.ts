@@ -11,7 +11,9 @@ export default function transformer(file: FileInfo, api: API) {
   const j = api.jscodeshift;
   const root = j(file.source);
 
+  const FUNCTION_IDENTIFIER_NAME = 'logError';
   const ERROR_VARIABLE_IDENTIFIER_NAME =  'error';
+  const IMPORT_SOURCE_LITERAL = 'src/lib.logger';
 
   const targetedConsoleCalls = root.find(j.CallExpression, {
     arguments: [{
@@ -46,23 +48,48 @@ export default function transformer(file: FileInfo, api: API) {
     return root.toSource();
   }
 
-  // atm we leave sorting out duplicated imports to linter
-  const newImport = j.importDeclaration(
-    [j.importSpecifier(j.identifier('logError'))],
-    j.literal('src/lib.logger'),
-  );
 
-  // 2. Find all existing import declarations
-  const importDeclarations = root.find(j.ImportDeclaration);
 
-  if (importDeclarations.length > 0) {
+  // Find all existing import declarations
+  const allImportDeclarations = root.find(j.ImportDeclaration);
+  const knownImportDeclarations = allImportDeclarations.filter(
+    callPath => {
+      return callPath.node.source.value === IMPORT_SOURCE_LITERAL;
+    }
+  )
+
+  assert(knownImportDeclarations.length === 0 || knownImportDeclarations.length === 1, 'Expected no more than one import from specified source');
+
+  let newImport;
+  if (knownImportDeclarations.length === 1) {
+    const knownDeclaration = knownImportDeclarations.nodes()[0];
+    const knownDeclarationSpecifiers = knownDeclaration.specifiers || [];
+    newImport = j.importDeclaration(
+      [...knownDeclarationSpecifiers, j.importSpecifier(j.identifier(FUNCTION_IDENTIFIER_NAME))],
+      j.literal(IMPORT_SOURCE_LITERAL),
+    );
+    allImportDeclarations.filter(
+      callPath => {
+        return callPath.node.source.value === IMPORT_SOURCE_LITERAL;
+      }
+    ).replaceWith(newImport);
+    return root.toSource();
+  } else {
+    newImport = j.importDeclaration(
+      [j.importSpecifier(j.identifier(FUNCTION_IDENTIFIER_NAME))],
+      j.literal(IMPORT_SOURCE_LITERAL),
+    );
+  }
+
+  if (allImportDeclarations.length > 0) {
+    // Imports exist
     // Find the last import and insert after it.
     // This automatically keeps the header comment (which is on the *first* import) in place.
-    j(importDeclarations.at(importDeclarations.length - 1).get()).insertAfter(
+    j(allImportDeclarations.at(allImportDeclarations.length - 1).get()).insertAfter(
       newImport
     );
   } else {
-    // --- CASE 2: No imports exist ---
+    // No imports exist
     // This is the tricky part. We must insert at the top,
     // but manually preserve any leading comments.
     const program = root.get().node.program;
